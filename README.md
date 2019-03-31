@@ -1,32 +1,74 @@
-# Sherlock
+## Sherlock
 
-## An investigative LV2 plugin bundle
+### An investigative LV2 plugin bundle
 
-### Webpage 
-
-Get more information at: [http://open-music-kontrollers.ch/lv2/sherlock](http://open-music-kontrollers.ch/lv2/sherlock)
-
-### Build status
+#### Build status
 
 [![build status](https://gitlab.com/OpenMusicKontrollers/sherlock.lv2/badges/master/build.svg)](https://gitlab.com/OpenMusicKontrollers/sherlock.lv2/commits/master)
 
-### Dependencies
+### Binaries
 
-* [LV2](http://lv2plug.in) (LV2 Plugin Standard)
-* [pugl](http://drobilla.net/software/pugl) (Portable API for OpenGL GUIs)
-* [nuklear](https://github.com/vurtun/nuklear) (Immediate-mode GUI)
+For GNU/Linux (64-bit, 32-bit, armv7), Windows (64-bit, 32-bit) and MacOS
+(64/32-bit univeral).
 
-### Build / install
+To install the plugin bundle on your system, simply copy the __sherlock.lv2__
+folder out of the platform folder of the downloaded package into your
+[LV2 path](http://lv2plug.in/pages/filesystem-hierarchy-standard.html).
 
-	git clone https://gitlab.com/OpenMusicKontrollers/sherlock.lv2.git
-	cd sherlock.lv2
-	mkdir build
-	cd build
-	cmake -DCMAKE_BUILD_TYPE=Release ..
-	make
-	sudo make install
+#### Stable release
 
-### License
+* [sherlock.lv2-0.16.0.zip](https://dl.open-music-kontrollers.ch/sherlock.lv2/stable/sherlock.lv2-0.16.0.zip) ([sig](https://dl.open-music-kontrollers.ch/sherlock.lv2/stable/sherlock.lv2-0.16.0.zip.sig))
+
+#### Unstable (nightly) release
+
+* [sherlock.lv2-latest-unstable.zip](https://dl.open-music-kontrollers.ch/sherlock.lv2/unstable/sherlock.lv2-latest-unstable.zip) ([sig](https://dl.open-music-kontrollers.ch/sherlock.lv2/unstable/sherlock.lv2-latest-unstable.zip.sig))
+
+### Sources
+
+#### Stable release
+
+* [sherlock.lv2-0.16.0.tar.xz](https://git.open-music-kontrollers.ch/lv2/sherlock.lv2/snapshot/sherlock.lv2-0.16.0.tar.xz)
+
+#### Git repository
+
+* <https://git.open-music-kontrollers.ch/lv2/sherlock.lv2>
+
+### Packages
+
+* [ArchLinux](https://www.archlinux.org/packages/community/x86_64/sherlock.lv2/)
+
+### Bugs and feature requests
+
+* [Gitlab](https://gitlab.com/OpenMusicKontrollers/sherlock.lv2)
+* [Github](https://github.com/OpenMusicKontrollers/sherlock.lv2)
+
+### Plugins
+
+#### Atom Inspector
+
+![Sherlock Atom Inspector](https://git.open-music-kontrollers.ch/lv2/sherlock.lv2/plain/screenshots/screenshot_1.png)
+
+The _Atom Inspector_ is meant as a monitor/debug tool for LV2 plugin
+and host authors. It captures all Atom events sent to its event input port
+and presents them on its user interface for convenient nested browsing.
+
+#### MIDI Inspector
+
+![Sherlock MIDI Inspector](https://git.open-music-kontrollers.ch/lv2/sherlock.lv2/plain/screenshots/screenshot_2.png)
+
+The _MIDI Inspector_ is meant as a monitor/debug tool for LV2 plugin
+and host authors. It captures all MIDI events sent to its event input port
+and presents them on its user interface for convenient nested browsing.
+
+#### OSC Inspector
+
+![Sherlock OSC Inspector](https://git.open-music-kontrollers.ch/lv2/sherlock.lv2/plain/screenshots/screenshot_3.png)
+
+The _OSC Inspector_ is meant as a monitor/debug tool for LV2 plugin
+and host authors. It captures all OSC events sent to its event input port
+and presents them on its user interface for convenient nested browsing.
+
+#### License
 
 Copyright (c) 2015-2016 Hanspeter Portner (dev@open-music-kontrollers.ch)
 
