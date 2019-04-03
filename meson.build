@@ -2,7 +2,7 @@ project('sherlock.lv2', 'c', default_options : [
 	'buildtype=release',
 	'warning_level=1',
 	'werror=false',
-	'b_lto=true',
+	'b_lto=false',
 	'c_std=c11'])
 
 static_link = meson.is_cross_build()
