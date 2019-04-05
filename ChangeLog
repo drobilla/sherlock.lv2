@@ -1,0 +1,25 @@
+# Changelog
+
+## [0.18.0] - 15 Apr 2019
+
+### Added
+
+* ui resize extension
+* tracing to host's log for atom_inspector
+* filtering by URID for atom_inspector
+
+### Changed
+
+* build system from CMake to meson
+* ui checkboxes
+* routing only OSC messages/bundles to ui
+* style to always light color row after frame row
+* put OSC arguments on separate rows
+
+### Fixed
+
+* automatic scaling on hiDPI displays
+* end-of-line handling in turtle lexer
+* atom item sizes reporting
+* turtle pretty number configuration switching
+* strobing shadowing when in non-following mode
