@@ -252,7 +252,6 @@ _midi_inspector_expose(struct nk_context *ctx, struct nk_rect wbounds, void *dat
 				lview.end = NK_MAX(handle->n_item, 0);
 				lview.begin = NK_MAX(lview.end - lview.count, 0);
 			}
-			handle->shadow = lview.begin % 2 == 0;
 			for(int l = lview.begin; (l < lview.end) && (l < handle->n_item); l++)
 			{
 				item_t *itm = handle->items[l];

@@ -153,7 +153,7 @@ _osc_argument(plughandle_t *handle, struct nk_context *ctx, const LV2_Atom *arg,
 		} break;
 		case LV2_OSC_IMPULSE:
 		{
-			_mem_printf(&mem, "I : iimpulse");
+			_mem_printf(&mem, "I : impulse");
 		} break;
 
 		case LV2_OSC_INT64:
@@ -302,7 +302,7 @@ _osc_packet(plughandle_t *handle, struct nk_context *ctx, int64_t frames,
 	nk_layout_row(ctx, NK_DYNAMIC, widget_h, 4, ratios);
 
 	_shadow(ctx, &handle->shadow);
-	if(frames > 0)
+	if(frames >= 0)
 	{
 		nk_labelf_colored(ctx, NK_TEXT_LEFT, yellow, "+%04"PRIi64, frames);
 	}
@@ -335,7 +335,7 @@ _osc_inspector_expose(struct nk_context *ctx, struct nk_rect wbounds, void *data
 	const char *window_name = "Sherlock";
 	if(nk_begin(ctx, window_name, wbounds, NK_WINDOW_NO_SCROLLBAR))
 	{
-		struct nk_panel *panel= nk_window_get_panel(ctx);
+		struct nk_panel *panel = nk_window_get_panel(ctx);
 		struct nk_command_buffer *canvas = nk_window_get_canvas(ctx);
 
 		const float body_h = panel->bounds.h - 4*window_padding.y - 2*widget_h;
@@ -357,7 +357,6 @@ _osc_inspector_expose(struct nk_context *ctx, struct nk_rect wbounds, void *data
 				lview.end = NK_MAX(handle->n_item, 0);
 				lview.begin = NK_MAX(lview.end - lview.count, 0);
 			}
-			handle->shadow = lview.begin % 2 == 0;
 			for(int l = lview.begin; (l < lview.end) && (l < handle->n_item); l++)
 			{
 				item_t *itm = handle->items[l];
@@ -403,7 +402,8 @@ _osc_inspector_expose(struct nk_context *ctx, struct nk_rect wbounds, void *data
 
 		const float n = 3;
 		const float r0 = 1.f / n;
-		const float r1 = 0.1f / 3; const float r2 = r0 - r1;
+		const float r1 = 0.1f / 3;
+		const float r2 = r0 - r1;
 		const float footer [6] = {r1, r2, r1, r2, r1, r2};
 		nk_layout_row(ctx, NK_DYNAMIC, widget_h, 6, footer);
 		{

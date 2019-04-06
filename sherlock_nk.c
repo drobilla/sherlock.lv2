@@ -411,9 +411,18 @@ _osc_message(plughandle_t *handle, const LV2_Atom_Object *obj)
 	const LV2_Atom_Tuple *args = NULL;
 	lv2_osc_message_get(&handle->osc_urid, obj, &path, &args);
 
+	bool first = true;
+
 	LV2_ATOM_TUPLE_FOREACH(args, arg)
 	{
-		_append_item(handle, ITEM_TYPE_NONE, 0);
+		if(first)
+		{
+			first = false;
+		}
+		else
+		{
+			_append_item(handle, ITEM_TYPE_NONE, 0);
+		}
 	}
 }
 
@@ -422,7 +431,7 @@ _osc_packet(plughandle_t *handle, const LV2_Atom_Object *obj)
 {
 	if(lv2_osc_is_message_type(&handle->osc_urid, obj->body.otype))
 	{
-		//_append_item(handle, ITEM_TYPE_NONE, 0);
+		_append_item(handle, ITEM_TYPE_NONE, 0);
 		_osc_message(handle, obj);
 	}
 	else if(lv2_osc_is_bundle_type(&handle->osc_urid, obj->body.otype))
@@ -557,8 +566,9 @@ port_event(LV2UI_Handle instance, uint32_t i, uint32_t size, uint32_t urid,
 					} break;
 					case SHERLOCK_OSC_INSPECTOR:
 					{
-						// bundles may span over multiple lines
 						const LV2_Atom_Object *obj = (const LV2_Atom_Object *)&ev->body;
+
+						// bundles may span over multiple lines
 						if(lv2_osc_is_bundle_type(&handle->osc_urid, obj->body.otype))
 						{
 							_osc_bundle(handle, obj);
@@ -570,9 +580,10 @@ port_event(LV2UI_Handle instance, uint32_t i, uint32_t size, uint32_t urid,
 					} break;
 					case SHERLOCK_MIDI_INSPECTOR:
 					{
-						// sysex messages may span over multiple lines
 						const uint8_t *msg = LV2_ATOM_BODY_CONST(&ev->body);
-						if( (msg[0] == 0xf0) && (ev->body.size > 4) )
+
+						// sysex messages may span over multiple lines
+						if( (msg[0] == LV2_MIDI_MSG_SYSTEM_EXCLUSIVE) && (ev->body.size > 4) )
 						{
 							for(uint32_t j = 4; j < ev->body.size; j += 4)
 								_append_item(handle, ITEM_TYPE_NONE, 0); // place holder
