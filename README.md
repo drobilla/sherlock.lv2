@@ -2,6 +2,11 @@
 
 ### An investigative LV2 plugin bundle
 
+This plugin bundle contains plugins for visualizing LV2 atom, MIDI and
+OSC events.
+
+Use them for monitoring and debugging of event signal flows inside plugin graphs.
+
 #### Build status
 
 [![build status](https://gitlab.com/OpenMusicKontrollers/sherlock.lv2/badges/master/build.svg)](https://gitlab.com/OpenMusicKontrollers/sherlock.lv2/commits/master)
