@@ -1,5 +1,5 @@
 /*
-  Copyright 2012-2015 David Robillard <http://drobilla.net>
+  Copyright 2012-2019 David Robillard <http://drobilla.net>
 
   Permission to use, copy, modify, and/or distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 */
 
 /**
-   @file pugl.hpp C++ API for Pugl, a minimal portable API for OpenGL.
+   @file pugl.hpp Public Pugl C++ API wrapper.
 */
 
 #ifndef PUGL_HPP_INCLUDED
@@ -66,8 +66,8 @@ public:
 		puglInitTransientFor(_view, parent);
 	}
 
-	virtual void initContextType(PuglContextType type) {
-		puglInitContextType(_view, type);
+	virtual void initBackend(const PuglBackend* backend) {
+		puglInitBackend(_view, backend);
 	}
 
 	virtual void createWindow(const char* title) {
@@ -83,8 +83,7 @@ public:
 	virtual void*      getContext()                 { return puglGetContext(_view); }
 	virtual void       ignoreKeyRepeat(bool ignore) { puglIgnoreKeyRepeat(_view, ignore); }
 	virtual void       grabFocus()                  { puglGrabFocus(_view); }
-	virtual void       copyToClipboard(char* selection) { puglCopyToClipboard(_view, selection); }
-	virtual const char* pasteFromClipboard()        { return puglPasteFromClipboard(_view); }
+	virtual void       requestAttention()           { puglRequestAttention(_view); }
 	virtual PuglStatus waitForEvent()               { return puglWaitForEvent(_view); }
 	virtual PuglStatus processEvents()              { return puglProcessEvents(_view); }
 	virtual void       postRedisplay()              { puglPostRedisplay(_view); }

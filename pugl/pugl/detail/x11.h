@@ -1,5 +1,5 @@
 /*
-  Copyright 2012-2015 David Robillard <http://drobilla.net>
+  Copyright 2012-2019 David Robillard <http://drobilla.net>
 
   Permission to use, copy, modify, and/or distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,17 +15,37 @@
 */
 
 /**
-   @file glu.h Portable header wrapper for glu.h.
-
-   Unfortunately, GL includes vary across platforms so this header allows for
-   pure portable programs.
+   @file x11.h Shared definitions for X11 implementation.
 */
 
-#ifdef __APPLE__
-#    include "OpenGL/glu.h"
-#else
-#    ifdef _WIN32
-#        include <windows.h>  /* Broken Windows GL headers require this */
-#    endif
-#    include "GL/glu.h"
-#endif
+#include "pugl/detail/implementation.h"
+
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+
+typedef struct {
+	Atom CLIPBOARD;
+	Atom UTF8_STRING;
+	Atom WM_PROTOCOLS;
+	Atom WM_DELETE_WINDOW;
+	Atom NET_WM_NAME;
+	Atom NET_WM_STATE;
+	Atom NET_WM_STATE_DEMANDS_ATTENTION;
+} PuglX11Atoms;
+
+struct PuglWorldInternalsImpl {
+	Display*     display;
+	PuglX11Atoms atoms;
+	XIM          xim;
+};
+
+struct PuglInternalsImpl {
+	Display*     display;
+	int          screen;
+	XVisualInfo* vi;
+	Window       win;
+	XIC          xic;
+	PuglSurface* surface;
+	PuglEvent    pendingConfigure;
+	PuglEvent    pendingExpose;
+};

@@ -1,5 +1,5 @@
 /*
-  Copyright 2012-2015 David Robillard <http://drobilla.net>
+  Copyright 2012-2019 David Robillard <http://drobilla.net>
 
   Permission to use, copy, modify, and/or distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,17 +15,28 @@
 */
 
 /**
-   @file glu.h Portable header wrapper for glu.h.
-
-   Unfortunately, GL includes vary across platforms so this header allows for
-   pure portable programs.
+   @file pugl_gl_backend.h Declaration of OpenGL backend accessor.
 */
 
-#ifdef __APPLE__
-#    include "OpenGL/glu.h"
-#else
-#    ifdef _WIN32
-#        include <windows.h>  /* Broken Windows GL headers require this */
-#    endif
-#    include "GL/glu.h"
+#ifndef PUGL_GL_BACKEND_H
+#define PUGL_GL_BACKEND_H
+
+#include "pugl/pugl.h"
+
+#ifdef __cplusplus
+extern "C" {
 #endif
+
+/**
+   OpenGL graphics backend.
+
+   Pass the return value to puglInitBackend() to draw to a view with OpenGL.
+*/
+PUGL_API const PuglBackend*
+puglGlBackend(void);
+
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif
+
+#endif // PUGL_GL_BACKEND_H
