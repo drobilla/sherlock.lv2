@@ -59,6 +59,7 @@ ui_srcs = ['sherlock_nk.c',
 	'atom_inspector_nk.c',
 	'midi_inspector_nk.c',
 	'osc_inspector_nk.c',
+    'pugl/pugl/detail/implementation.c',
 	lfiles]
 
 c_args = ['-fvisibility=hidden',
@@ -70,19 +71,22 @@ if host_machine.system() == 'windows'
 	ui_deps += cc.find_library('opengl32')
 	ui_deps += cc.find_library('gdi32')
 	ui_deps += cc.find_library('user32')
-	ui_srcs += 'pugl/pugl/pugl_win.cpp'
+	ui_srcs += 'pugl/pugl/win.c'
+	ui_srcs += 'pugl/pugl/win_gl.c'
 elif host_machine.system() == 'darwin'
 	add_languages('objc')
 	conf_data.set('UI_TYPE', 'CocoaUI')
 	ui_links += ['-framework', 'OpenGL']
 	ui_links += ['-framework', 'Cocoa']
-	ui_srcs += 'pugl/pugl/pugl_osx.m'
+	ui_srcs += 'pugl/pugl/mac.m'
+	ui_srcs += 'pugl/pugl/mac_gl.m'
 else
 	conf_data.set('UI_TYPE', 'X11UI')
 	ui_deps += dependency('gl')
 	ui_deps += dependency('x11', version : '>=1.6.0')
 	ui_deps += dependency('xext', version : '>=1.3.0')
-	ui_srcs += 'pugl/pugl/pugl_x11.c'
+	ui_srcs += 'pugl/pugl/detail/x11.c'
+	ui_srcs += 'pugl/pugl/detail/x11_gl.c'
 endif
 
 mod = shared_module('sherlock', dsp_srcs,

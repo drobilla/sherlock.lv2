@@ -26,6 +26,7 @@ extern C {
 #endif
 
 #include "pugl/pugl.h"
+#include "pugl/pugl_gl_backend.h"
 #include "pugl/gl.h"
 
 #if defined(_WIN32)
@@ -95,6 +96,7 @@ struct _nk_pugl_window_t {
 	char urn [46];
 	float scale;
 
+	PuglWorld *world;
 	PuglView *view;
 	int quit;
 
@@ -474,7 +476,7 @@ _nk_pugl_host_resize(nk_pugl_window_t *win)
 static void
 _nk_pugl_reconfigure(nk_pugl_window_t *win)
 {
-	puglEnterContext(win->view);
+	puglEnterContext(win->view, false);
 	{
 		_nk_pugl_font_deinit(win);
 		_nk_pugl_font_init(win);
@@ -519,7 +521,7 @@ _nk_pugl_special_key_down(nk_pugl_window_t *win, const PuglEventKey *ev)
 	struct nk_context *ctx = &win->ctx;
 	const bool control = ev->state & PUGL_MOD_CTRL;
 
-	switch(ev->special)
+	switch(ev->key)
 	{
 		case PUGL_KEY_F1:
 		case PUGL_KEY_F2:
@@ -622,7 +624,7 @@ _nk_pugl_special_key_up(nk_pugl_window_t *win, const PuglEventKey *ev)
 {
 	struct nk_context *ctx = &win->ctx;
 
-	switch(ev->special)
+	switch(ev->key)
 	{
 		case PUGL_KEY_F1:
 		case PUGL_KEY_F2:
@@ -685,7 +687,7 @@ _nk_pugl_other_key_down(nk_pugl_window_t *win, const PuglEventKey *ev)
 	// automatically enter insert mode upon non-special key press
 	_nk_pugl_key_press(ctx, NK_KEY_TEXT_INSERT_MODE);
 
-	switch(ev->character)
+	switch(ev->key)
 	{
 		case '\n':
 		case '\r':
@@ -696,7 +698,7 @@ _nk_pugl_other_key_down(nk_pugl_window_t *win, const PuglEventKey *ev)
 		{
 			_nk_pugl_key_press(ctx, NK_KEY_TAB);
 		}	break;
-		case PUGL_CHAR_DELETE:
+		case PUGL_KEY_DELETE:
 		{
 #if defined(__APPLE__) // quirk around Apple's Delete key strangeness
 			_nk_pugl_key_press(ctx, NK_KEY_BACKSPACE);
@@ -704,7 +706,7 @@ _nk_pugl_other_key_down(nk_pugl_window_t *win, const PuglEventKey *ev)
 			_nk_pugl_key_press(ctx, NK_KEY_DEL);
 #endif
 		}	break;
-		case PUGL_CHAR_BACKSPACE:
+		case PUGL_KEY_BACKSPACE:
 		{
 #if defined(__APPLE__) // quirk around Apple's Delete key strangeness
 			_nk_pugl_key_press(ctx, NK_KEY_DEL);
@@ -712,7 +714,7 @@ _nk_pugl_other_key_down(nk_pugl_window_t *win, const PuglEventKey *ev)
 			_nk_pugl_key_press(ctx, NK_KEY_BACKSPACE);
 #endif
 		}	break;
-		case PUGL_CHAR_ESCAPE:
+		case PUGL_KEY_ESCAPE:
 		{
 			_nk_pugl_key_press(ctx, NK_KEY_TEXT_RESET_MODE);
 		} break;
@@ -721,19 +723,19 @@ _nk_pugl_other_key_down(nk_pugl_window_t *win, const PuglEventKey *ev)
 		{
 			if(modifier)
 			{
-				if(ev->character == '+')
+				if(ev->key == '+')
 				{
 					_nk_pugl_zoom_in(win);
 					break;
 				}
-				else if(ev->character == '-')
+				else if(ev->key == '-')
 				{
 					_nk_pugl_zoom_out(win);
 					break;
 				}
 
 				// unescape ASCII control chars + Control
-				const uint32_t character = ev->character | 0x60;
+				const uint32_t character = ev->key;// | 0x60;
 
 				switch(character)
 				{
@@ -759,13 +761,13 @@ _nk_pugl_other_key_down(nk_pugl_window_t *win, const PuglEventKey *ev)
 
 					default:
 					{
-						nk_input_glyph(ctx, (const char *)ev->utf8);
+						/* nk_input_glyph(ctx, (const char *)ev->utf8); */
 					} break;
 				}
 			}
 			else
 			{
-				nk_input_glyph(ctx, (const char *)ev->utf8);
+				/* nk_input_glyph(ctx, (const char *)ev->utf8); */
 			}
 		} break;
 	}
@@ -803,9 +805,9 @@ _nk_pugl_modifiers(nk_pugl_window_t *win, PuglMod state)
 static bool
 _nk_pugl_key_down(nk_pugl_window_t *win, const PuglEventKey *ev)
 {
-	if(ev->special)
+	if(ev->key >= 0xE000 && ev->key <= 0xF8FF)
 		return _nk_pugl_special_key_down(win, ev);
-	else if(ev->character && !ev->filter)
+	else //if(ev->character && !ev->filter)
 		return _nk_pugl_other_key_down(win, ev);
 
 	return false;
@@ -814,7 +816,7 @@ _nk_pugl_key_down(nk_pugl_window_t *win, const PuglEventKey *ev)
 static bool
 _nk_pugl_key_up(nk_pugl_window_t *win, const PuglEventKey *ev)
 {
-	if(ev->special)
+	if(ev->key >= 0xE000 && ev->key <= 0xF8FF)
 		return _nk_pugl_special_key_up(win, ev);
 
 	return false;
@@ -850,13 +852,14 @@ _nk_pugl_expose(PuglView *view)
 	_nk_pugl_render_gl2(win);
 }
 
-static void
+static PuglStatus
 _nk_pugl_dummy_func(PuglView *view, const PuglEvent *e)
 {
 	// do nothing
+	return PUGL_SUCCESS;
 }
 
-static void
+static PuglStatus
 _nk_pugl_event_func(PuglView *view, const PuglEvent *e)
 {
 	nk_pugl_window_t *win = puglGetHandle(view);
@@ -933,6 +936,11 @@ _nk_pugl_event_func(PuglView *view, const PuglEvent *e)
 			puglPostRedisplay(win->view);
 			break;
 		}
+		case PUGL_TEXT:
+		{
+			nk_input_glyph(ctx, ((const PuglEventText*)e)->string);
+			break;
+		}
 		case PUGL_MOTION_NOTIFY:
 		{
 			const PuglEventMotion *ev = (const PuglEventMotion *)e;
@@ -987,6 +995,7 @@ _nk_pugl_event_func(PuglView *view, const PuglEvent *e)
 			break;
 		}
 	}
+	return PUGL_SUCCESS;
 }
 
 static void
@@ -1062,7 +1071,8 @@ nk_pugl_init(nk_pugl_window_t *win)
 	cfg->min_height *= win->scale;
 
 	// init pugl
-	win->view = puglInit(NULL, NULL);
+	win->world = puglNewWorld();
+	win->view = puglNewView(win->world);
 
 #if defined(__APPLE__) || defined(_WIN32)
 	uint8_t bytes [0x10];
@@ -1084,19 +1094,20 @@ nk_pugl_init(nk_pugl_window_t *win)
 	fprintf(stderr, "%s\n", win->urn);
 	puglInitWindowClass(win->view, win->urn);
 #else
-	puglInitWindowClass(win->view, cfg->class ? cfg->class : "nuklear");
+	puglSetClassName(win->world, cfg->class ? cfg->class : "nuklear");
 #endif
-	puglInitWindowSize(win->view, cfg->width, cfg->height);
-	puglInitWindowMinSize(win->view, cfg->min_width, cfg->min_height);
-	puglInitResizable(win->view, cfg->resizable);
+	PuglRect frame = { 0, 0, cfg->width, cfg->height };
+	puglSetFrame(win->view, frame);
+	puglSetMinSize(win->view, cfg->min_width, cfg->min_height);
+	puglSetViewHint(win->view, PUGL_RESIZABLE, cfg->resizable);
 	if(cfg->fixed_aspect)
-		puglInitWindowAspectRatio(win->view, cfg->width, cfg->height, cfg->width, cfg->height);
-	puglInitWindowParent(win->view, cfg->parent);
-	puglInitTransientFor(win->view, cfg->parent);
+		puglSetAspectRatio(win->view, cfg->width, cfg->height, cfg->width, cfg->height);
+	puglSetParentWindow(win->view, cfg->parent);
+	puglSetTransientFor(win->view, cfg->parent);
 	puglSetHandle(win->view, win);
 	puglSetEventFunc(win->view, _nk_pugl_dummy_func);
-	puglIgnoreKeyRepeat(win->view, cfg->ignore);
-	puglInitContextType(win->view, PUGL_GL);
+	puglSetViewHint(win->view, PUGL_IGNORE_KEY_REPEAT, cfg->ignore);
+	puglSetBackend(win->view, puglGlBackend());
 	const int stat = puglCreateWindow(win->view, cfg->title ? cfg->title : "Nuklear");
 	assert(stat == 0);
 
@@ -1106,7 +1117,7 @@ nk_pugl_init(nk_pugl_window_t *win)
 	nk_buffer_init_default(&win->ebuf);
 	nk_init_default(&win->ctx, 0);
 
-	puglEnterContext(win->view);
+	puglEnterContext(win->view, false);
 	{
 		// init font system
 		_nk_pugl_font_init(win);
@@ -1168,7 +1179,7 @@ nk_pugl_shutdown(nk_pugl_window_t *win)
 	if(win->last.buffer)
 		free(win->last.buffer);
 
-	puglEnterContext(win->view);
+	puglEnterContext(win->view, false);
 	{
 		// deinit font system
 		_nk_pugl_font_deinit(win);
@@ -1182,7 +1193,8 @@ nk_pugl_shutdown(nk_pugl_window_t *win)
 	nk_free(&win->ctx);
 
 	// shutdown pugl
-	puglDestroy(win->view);
+	puglFreeView(win->view);
+	puglFreeWorld(win->world);
 
 #if !defined(__APPLE__) && !defined(_WIN32)
 	if(win->disp)
@@ -1196,7 +1208,7 @@ nk_pugl_wait_for_event(nk_pugl_window_t *win)
 	if(!win->view)
 		return;
 
-	puglWaitForEvent(win->view);
+	puglPollEvents(win->world, -1);
 }
 
 NK_PUGL_API int
@@ -1205,7 +1217,7 @@ nk_pugl_process_events(nk_pugl_window_t *win)
 	if(!win->view)
 		return 1; // quit
 
-	PuglStatus stat = puglProcessEvents(win->view);
+	PuglStatus stat = puglDispatchEvents(win->world);
 	(void)stat;
 
 	return win->quit;
@@ -1286,7 +1298,7 @@ nk_pugl_icon_load(nk_pugl_window_t *win, const char *filename)
 	uint8_t *data = stbi_load(filename, &w, &h, &n, 4);
 	if(data)
 	{
-		puglEnterContext(win->view);
+		puglEnterContext(win->view, false);
 		{
 			glGenTextures(1, &tex);
 			glBindTexture(GL_TEXTURE_2D, tex);
@@ -1316,7 +1328,7 @@ nk_pugl_icon_unload(nk_pugl_window_t *win, struct nk_image img)
 
 	if(img.handle.id)
 	{
-		puglEnterContext(win->view);
+		puglEnterContext(win->view, false);
 		{
 			glDeleteTextures(1, (const GLuint *)&img.handle.id);
 		}
@@ -1349,13 +1361,14 @@ nk_pugl_is_shortcut_pressed(struct nk_input *in, char letter, bool clear)
 NK_PUGL_API void
 nk_pugl_copy_to_clipboard(nk_pugl_window_t *win, const char *selection, size_t len)
 {
-	puglCopyToClipboard(win->view, selection, len);
+	puglSetClipboard(win->view, NULL, selection, len);
 }
 
 NK_PUGL_API const char *
 nk_pugl_paste_from_clipboard(nk_pugl_window_t *win, size_t *len)
 {
-	return puglPasteFromClipboard(win->view, len);
+	const char* type = NULL;
+	return puglGetClipboard(win->view, &type, len);
 }
 
 NK_PUGL_API float
